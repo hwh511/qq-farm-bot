@@ -2,9 +2,10 @@
   <el-dialog
     v-model="visible"
     :title="isAdmin && editing ? '编辑公告' : '📢 公告'"
-    width="520px"
+    width="90vw"
     :close-on-click-modal="true"
     class="announcement-dialog"
+    style="max-width:520px"
   >
     <!-- 查看模式 -->
     <template v-if="!editing">
@@ -165,38 +166,50 @@ defineExpose({ open })
 </script>
 
 <style scoped>
+/* 公告内容适配移动端 */
 .announcement-content {
   padding: 4px 0;
 }
-
 .announcement-title {
   font-size: 18px;
   font-weight: 600;
   color: var(--text);
   margin: 0 0 12px 0;
 }
-
 .announcement-body {
   font-size: 14px;
   line-height: 1.8;
   color: var(--text-secondary);
   word-break: break-word;
 }
-
 .announcement-time {
   margin-top: 16px;
   font-size: 12px;
   color: var(--text-muted);
   text-align: right;
 }
-
 .announcement-empty {
   padding: 20px 0;
 }
-
 .dialog-footer {
   display: flex;
+  flex-wrap: wrap;
   justify-content: flex-end;
   gap: 8px;
+}
+@media (max-width: 600px) {
+  .announcement-title {
+    font-size: 16px;
+  }
+  .announcement-body {
+    font-size: 13px;
+  }
+  .announcement-time {
+    font-size: 11px;
+  }
+  .announcement-dialog {
+    width: 95vw !important;
+    max-width: 99vw !important;
+  }
 }
 </style>
