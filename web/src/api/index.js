@@ -117,4 +117,14 @@ export function deleteAdminUser(id) {
   return api.delete(`/admin/users/${id}`)
 }
 
+// ============ 公告 API ============
+
+export function getAnnouncement() {
+  return api.get('/announcement')
+}
+
+export function updateAnnouncement(data) {
+  return api.put('/announcement', data)
+}
+
 export default api

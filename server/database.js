@@ -144,6 +144,18 @@ async function initDatabase() {
     db.run(`CREATE INDEX IF NOT EXISTS idx_logs_uin ON bot_logs(user_uin)`);
     db.run(`CREATE INDEX IF NOT EXISTS idx_logs_created ON bot_logs(created_at)`);
 
+    // 创建公告表
+    db.run(`
+        CREATE TABLE IF NOT EXISTS announcements (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT DEFAULT '',
+            content TEXT DEFAULT '',
+            enabled INTEGER DEFAULT 1,
+            updated_at TEXT DEFAULT (datetime('now','localtime')),
+            created_at TEXT DEFAULT (datetime('now','localtime'))
+        )
+    `);
+
     // 迁移: 添加 preferred_seed_id 列
     try { db.run(`ALTER TABLE users ADD COLUMN preferred_seed_id INTEGER DEFAULT 0`); } catch (e) { /* 列已存在 */ }
 
@@ -292,6 +304,24 @@ function deleteAdminUser(id) {
     saveToFile();
 }
 
+// ============ 公告 ============
+
+function getAnnouncement() {
+    return queryOne('SELECT * FROM announcements WHERE enabled = 1 ORDER BY updated_at DESC LIMIT 1');
+}
+
+function saveAnnouncement({ title, content }) {
+    const existing = queryOne('SELECT * FROM announcements LIMIT 1');
+    if (existing) {
+        run(`UPDATE announcements SET title = ?, content = ?, enabled = 1, updated_at = datetime('now','localtime') WHERE id = ?`,
+            [title, content, existing.id]);
+    } else {
+        run(`INSERT INTO announcements (title, content) VALUES (?, ?)`, [title, content]);
+    }
+    saveToFile();
+    return getAnnouncement();
+}
+
 /** 确保存在默认管理员 (首次运行时) */
 function ensureDefaultAdmin() {
     const admin = getAdminUser('admin');
@@ -339,4 +369,7 @@ module.exports = {
     updateAdminUser,
     deleteAdminUser,
     ensureDefaultAdmin,
+    // 公告
+    getAnnouncement,
+    saveAnnouncement,
 };

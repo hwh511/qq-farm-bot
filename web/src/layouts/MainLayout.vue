@@ -115,6 +115,15 @@
         </div>
         <div class="top-bar-right">
           <el-button
+            class="announcement-btn"
+            circle
+            size="small"
+            @click="$refs.announcementRef.open()"
+            title="公告"
+          >
+            <el-icon :size="16"><Bell /></el-icon>
+          </el-button>
+          <el-button
             class="theme-toggle-btn"
             circle
             size="small"
@@ -145,6 +154,9 @@
         <router-view :key="route.fullPath" />
       </div>
     </main>
+
+    <!-- 公告弹窗 -->
+    <AnnouncementDialog ref="announcementRef" :is-admin="auth.isAdmin" />
 
     <!-- 移动端遮罩 -->
     <div class="mobile-overlay" v-if="mobileMenuOpen" @click="mobileMenuOpen = false" />
@@ -193,6 +205,7 @@ import { useAuthStore } from '../stores/auth.js'
 import { useThemeStore } from '../stores/theme.js'
 import { connected, onEvent, offEvent } from '../socket/index.js'
 import { getAccounts } from '../api/index.js'
+import AnnouncementDialog from '../components/AnnouncementDialog.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -485,6 +498,17 @@ onUnmounted(() => {
 .theme-toggle-btn:hover {
   color: var(--accent) !important;
   border-color: var(--accent) !important;
+}
+
+.announcement-btn {
+  background: var(--bg-hover) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text-muted) !important;
+  transition: all 0.2s;
+}
+.announcement-btn:hover {
+  color: var(--color-warning) !important;
+  border-color: var(--color-warning) !important;
 }
 
 .top-bar-right {

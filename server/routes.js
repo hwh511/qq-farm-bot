@@ -381,4 +381,33 @@ router.delete('/admin/users/:id', adminOnly, (req, res) => {
     }
 });
 
+// ============================================================
+//  公告
+// ============================================================
+
+/** GET /api/announcement */
+router.get('/announcement', authMiddleware, (req, res) => {
+    try {
+        const announcement = db.getAnnouncement();
+        res.json({ ok: true, data: announcement || null });
+    } catch (err) {
+        res.status(500).json({ ok: false, error: err.message });
+    }
+});
+
+/** PUT /api/announcement (管理员) */
+router.put('/announcement', adminOnly, (req, res) => {
+    try {
+        const { title = '', content = '' } = req.body || {};
+        if (!content.trim()) return res.status(400).json({ ok: false, error: '公告内容不能为空' });
+        const announcement = db.saveAnnouncement({ title: title.trim(), content: content.trim() });
+        // 通过 Socket.io 实时推送公告更新
+        const io = req.app.locals.io;
+        if (io) io.emit('announcement:update', announcement);
+        res.json({ ok: true, data: announcement });
+    } catch (err) {
+        res.status(500).json({ ok: false, error: err.message });
+    }
+});
+
 module.exports = router;
