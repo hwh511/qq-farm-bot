@@ -184,6 +184,92 @@ services:
 
 > 生成随机密钥：`openssl rand -hex 16`
 
+---
+
+## GitHub Actions 自动部署
+
+配置后，每次 push 到 main 分支，服务器会自动拉取最新代码并重启服务。
+
+### 1. 服务器准备
+
+在服务器上生成 SSH 密钥（如果已有可跳过）：
+
+```bash
+ssh-keygen -t ed25519 -C "deploy" -f ~/.ssh/id_ed25519 -N ""
+```
+
+将公钥添加到授权列表：
+
+```bash
+cat ~/.ssh/id_ed25519.pub >> ~/.ssh/authorized_keys
+chmod 600 ~/.ssh/authorized_keys
+```
+
+查看私钥（后面要用）：
+
+```bash
+cat ~/.ssh/id_ed25519
+```
+
+### 2. 配置 GitHub Secrets
+
+进入仓库页面 → **Settings** → **Secrets and variables** → **Actions** → **New repository secret**
+
+添加以下 4 个 Secret：
+
+| Name | 值 |
+|:---|:---|
+| `SERVER_HOST` | 服务器公网 IP（如 `123.45.67.89`） |
+| `SERVER_USER` | SSH 用户名（如 `root`） |
+| `SERVER_PORT` | SSH 端口（通常 `22`） |
+| `SERVER_SSH_KEY` | 服务器私钥（`cat ~/.ssh/id_ed25519` 的完整输出，包含 BEGIN 和 END 行） |
+
+### 3. 创建 Workflow 文件
+
+在项目根目录创建 `.github/workflows/deploy.yml`：
+
+```yaml
+name: 自动部署到服务器
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 部署到服务器
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: ${{ secrets.SERVER_PORT }}
+          script: |
+            cd /root/qq-farm-bot
+            git pull origin main
+            cd web && npm install && npm run build
+            cd .. && npm install
+            pm2 restart qq-farm-bot || pm2 start server/index.js --name qq-farm-bot
+```
+
+> 注意：将 `/root/qq-farm-bot` 替换为你服务器上项目的实际路径。
+
+### 4. 推送并测试
+
+```bash
+git add -A
+git commit -m "ci: 添加 GitHub Actions 自动部署"
+git push
+```
+
+前往仓库 **Actions** 标签页查看部署状态。首次可能失败，请检查：
+- Secrets 是否正确配置
+- 服务器是否已添加公钥到 `authorized_keys`
+- 项目路径是否正确
+
 
 ---
 
