@@ -6,7 +6,7 @@ services:
     container_name: qq-farm-bot
     restart: unless-stopped
     ports:
-      - "3000:3000" 
+      - "80:3000" 
     volumes:
       # 持久化数据库，防止容器重建后数据丢失 
       - ./data:/app/data 
