@@ -1,6 +1,6 @@
 <div align="center">
 
-wenhao
+文浩
 
 # QQ-FARM-BOT
 
