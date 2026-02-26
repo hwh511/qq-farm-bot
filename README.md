@@ -1,6 +1,6 @@
 <div align="center">
 
-文浩.
+文浩
 
 # QQ-FARM-BOT
 
